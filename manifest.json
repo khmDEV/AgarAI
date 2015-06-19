@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "AgarAI",
+  "version": "0.1",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "description": "AI for Agar.io",
+  "permissions": [
+    "tabs", "http://agar.io/*",
+    "webRequest",
+    "webRequestBlocking",
+    "activeTab"
+  ],
+  "web_accessible_resources": [
+    "main_out_plus.js",
+    "AI.js"
+  ],
+  "icons": {
+    "48": "icon.png"
+  }
+}
