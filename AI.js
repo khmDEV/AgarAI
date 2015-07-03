@@ -91,6 +91,7 @@ var DIE = false;
   MIDDLEWARE.render = render;
   MIDDLEWARE.AI = AI;
   MIDDLEWARE.start = startGame;
+  MIDDLEWARE.pauseGame=pauseGame;
 
 
   function startGame() {
@@ -104,7 +105,11 @@ var DIE = false;
     setShowMass(1);
     document.getElementById('nick').value = DEFAULT_NAME;
     Rod = undefined;
-
+  }
+  function pauseGame() {
+    if(AUTO_RESTART){
+      setNick(document.getElementById('nick').value);
+    }
   }
 
   var maxScore = 0;
@@ -136,9 +141,6 @@ var DIE = false;
   function AI() {
     if (MIDDLEWARE.isPlaying) {
       var s = MIDDLEWARE.getScore();
-      if (maxScore < s) {
-        AUTO_RESTART = false;
-      }
       maxScore = maxScore < s ? s : maxScore;
       calculate();
       MIDDLEWARE.goTo(Xc, Yc);
@@ -376,7 +378,7 @@ var DIE = false;
     texts = [];
 
     var R = costMinRec(init, remove(points, init), 0, vectorDanger);
-    console.log(T);
+    //console.log(T);
     //console.log(R);
     return R;
   }
