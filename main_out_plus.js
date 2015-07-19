@@ -8,29 +8,18 @@
 // @grant        none
 // ==/UserScript==
 
-
-
 (function(g, m) {
   /*
    * SET UP MIDDLEWARE
    */
-
-  /////CHROME EXTENSION/////
-  var file = "AI.js";
-  if (typeof USER_SCRIPT == "undefined") {
-    includeJS(file);
-  }
-
-  function includeJS(incFile) {
-    document.write('<script type="text/javascript" src="' + incFile + '"></script>');
-  }
-  ///////////////////////////
 
   /*
     MIDDLEWARE:
        ENABLED: the system is enabled?
        isPlaying(): the game is started
        goTo(x,y): move the node to (x,y)
+       getMaxX(): return the max X
+       getMaxY(): return the max Y
        getNodes(): return all nodes
            Node:
              x: x position
@@ -52,7 +41,23 @@
     MIDDLEWARE.AI = none;
     MIDDLEWARE.start = none;
     MIDDLEWARE.pauseGame = none;
+    MIDDLEWARE.unpauseGame = none;
   }
+  MIDDLEWARE.MAX_X = 7054;
+  MIDDLEWARE.MAX_Y = 7054;
+  MIDDLEWARE.MIN_X = -7054;
+  MIDDLEWARE.MIN_Y = -7054;
+
+  MIDDLEWARE.setNick=function(nick){
+    document.getElementById('nick').value=nick;
+  };
+
+  MIDDLEWARE.getNick=function(nick){
+    return document.getElementById('nick').value;
+  };
+  MIDDLEWARE.startGame=function(){
+    setNick(MIDDLEWARE.getNick());
+  };
 
   MIDDLEWARE.isPlaying = function() {
     return wa() && null != F;
@@ -223,11 +228,20 @@
     MIDDLEWARE.start();
   }
 
-  //PAUSE GAME
+  //UNPAUSE GAME
   function Ha() {
     m("#adsBottom").hide();
     m("#overlays").hide();
     Ga()
+    MIDDLEWARE.unpauseGame();
+  }
+
+  //PAUSE GAME
+  function Da(a) {
+    F = null;
+    Za();
+    m("#overlays").fadeIn(a ? 200 : 3E3);
+    a || m("#adsBottom").fadeIn(3E3)
     MIDDLEWARE.pauseGame();
   }
 
@@ -286,13 +300,6 @@
 
   function W(a) {
     a && a != w && (m("#region").val() != a && m("#region").val(a), w = g.localStorage.location = a, m(".region-message").hide(), m(".region-message." + a).show(), m(".btn-needs-server").prop("disabled", !1), oa && X())
-  }
-
-  function Da(a) {
-    F = null;
-    Za();
-    m("#overlays").fadeIn(a ? 200 : 3E3);
-    a || m("#adsBottom").fadeIn(3E3)
   }
 
   function Ga() {

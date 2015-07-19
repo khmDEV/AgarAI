@@ -13,8 +13,6 @@ USER_SCRIPT = true; //USER_SCRIPT mode
 /*
  * OPTIONS
  */
-const MAX_X = 12000;
-const MAX_Y = 12000;
 const LINE_SIZE = 5;
 
 const COLOR_ENEMY = "#FF0909"; //RED
@@ -71,6 +69,7 @@ var COF_SIZE = 1.2;
 var lines = [];
 var texts = [];
 var DIE = false;
+
 /*
  * SET UP MIDDLEWARE
  */
@@ -91,7 +90,8 @@ var DIE = false;
   MIDDLEWARE.render = render;
   MIDDLEWARE.AI = AI;
   MIDDLEWARE.start = startGame;
-  MIDDLEWARE.pauseGame=pauseGame;
+  MIDDLEWARE.pauseGame = pauseGame;
+  MIDDLEWARE.unpauseGame = none;
 
 
   function startGame() {
@@ -103,12 +103,14 @@ var DIE = false;
     }
     setDarkTheme(1);
     setShowMass(1);
-    document.getElementById('nick').value = DEFAULT_NAME;
+    MIDDLEWARE.setNick(DEFAULT_NAME);
+
     Rod = undefined;
   }
+
   function pauseGame() {
-    if(AUTO_RESTART){
-      setNick(document.getElementById('nick').value);
+    if (AUTO_RESTART) {
+      MIDDLEWARE.startGame();
     }
   }
 
@@ -142,9 +144,11 @@ var DIE = false;
     if (MIDDLEWARE.isPlaying) {
       var s = MIDDLEWARE.getScore();
       maxScore = maxScore < s ? s : maxScore;
-      calculate();
-      MIDDLEWARE.goTo(Xc, Yc);
-
+      var dir = calculate();
+      
+      if (dir != undefined) {
+        MIDDLEWARE.goTo(dir[0], dir[1]);
+      }
       if (DIE) {
         DIE = false;
         divide2save();
@@ -156,17 +160,17 @@ var DIE = false;
     var lpl = MIDDLEWARE.getPlayers();
     //console.log(lpl);
     var arr = MIDDLEWARE.getNodes();
-    Xc = 0; //<-----
-    Yc = 0; //<-----
+    var Xc = 0,
+      Yc = 0; //<-----
     if (lpl.length == 0) {
       return;
     } else if (lpl.length == 1) {
       player = lpl[0];
     } else { //Multi nodes (EXPERIMENTAL)
-      var minX = MAX_X,
-        maxX = 0,
-        minY = MAX_Y,
-        maxY = 0,
+      var minX = MIDDLEWARE.MAX_X,
+        maxX = MIDDLEWARE.MIN_X,
+        minY = MIDDLEWARE.MAX_Y,
+        maxY = MIDDLEWARE.MIN_Y,
         size = pl.size;
       for (var i = 0; i < lpl.length; i++) {
         var pl = lpl[i];
@@ -190,18 +194,18 @@ var DIE = false;
 
     //LIMITS
     var SIZE_MIN = player.size * COF_SIZE * 2;
-    var DISTANCE_MIN = 10;
+    var DISTANCE_MIN = SIZE_MIN / 2;
     for (var i = 0; i < LIMMIT_PRESION; i++) {
       arr.push({
         size: SIZE_MIN,
-        x: -DISTANCE_MIN,
+        x: -DISTANCE_MIN + MIDDLEWARE.MIN_X,
         y: player.y,
         isVirus: false,
         isWall: true
       });
       arr.push({
         size: SIZE_MIN,
-        x: MAX_X + DISTANCE_MIN,
+        x: MIDDLEWARE.MAX_X + DISTANCE_MIN,
         y: player.y,
         isVirus: false,
         isWall: true
@@ -209,14 +213,14 @@ var DIE = false;
       arr.push({
         size: SIZE_MIN,
         x: player.x,
-        y: -DISTANCE_MIN,
+        y: -DISTANCE_MIN + MIDDLEWARE.MIN_Y,
         isVirus: false,
         isWall: true
       });
       arr.push({
         size: SIZE_MIN,
         x: player.x,
-        y: MAX_Y + DISTANCE_MIN,
+        y: MIDDLEWARE.MAX_Y + DISTANCE_MIN,
         isVirus: false,
         isWall: true
       });
@@ -239,7 +243,7 @@ var DIE = false;
           danger.push(e);
           var xt = distanceX(player, e), //(player.x - e.x), //
             yt = distanceY(player, e), //(player.y - e.y), //
-            mt = MAX_X + MAX_Y;
+            mt = MIDDLEWARE.MAX_X + MIDDLEWARE.MAX_Y;
           if (dist < MAX_MOVE) {
             //console.log(e);
             if (LINES && LINES_DANGER) {
@@ -261,7 +265,7 @@ var DIE = false;
               vectorEnemys[1] += yt > 0 ? 1 - (yt / mt) : -1 + (yt / mt);
             }
           }
-        } else if (e.size * COF_SIZE< player.size) {
+        } else if (e.size * COF_SIZE < player.size) {
           if (LINES && LINES_TESTS) {
             lines.push([player, e, COLOR_TEST, LINE_SIZE]);
           }
@@ -320,39 +324,39 @@ var DIE = false;
       y = vectorDanger[1];
     }
 
-    if (player.x < player.size && x < 0) {
+    if (player.x < player.size + MIDDLEWARE.MIN_X && x < 0) {
       x = 0;
-    } else if (player.x > MAX_X - player.size && x > 0) {
+    } else if (player.x > MIDDLEWARE.MAX_X - player.size && x > MIDDLEWARE.MIN_X) {
       x = 0;
     }
 
-    if (player.y < player.size && y < 0) {
+    if (player.y < player.size + MIDDLEWARE.MIN_Y && y < 0) {
       y = 0;
-    } else if (player.y > MAX_Y - player.size && y > 0) {
+    } else if (player.y > MIDDLEWARE.MAX_Y - player.size && y > 0) {
       y = 0;
     }
 
     if (x == 0 && y == 0) {
       if (ALERT) {
-        if (player.y < player.size&&vectorDanger[0]<vectorDanger[1]) {
+        if (player.y < player.size + MIDDLEWARE.MIN_Y && vectorDanger[0] < vectorDanger[1]) {
           y = 1;
-        } else if (player.y > MAX_Y - player.size&&vectorDanger[0]>vectorDanger[1]) {
+        } else if (player.y > MIDDLEWARE.MAX_Y - player.size && vectorDanger[0] > vectorDanger[1]) {
           y = -1;
         }
-        if (player.x < player.size&&vectorDanger[0]<vectorDanger[1]) {
+        if (player.x < player.size + MIDDLEWARE.MIN_X && vectorDanger[0] < vectorDanger[1]) {
           x = 1;
-        } else if (player.x > MAX_X - player.size&&vectorDanger[0]>vectorDanger[1]) {
+        } else if (player.x > MIDDLEWARE.MAX_X - player.size && vectorDanger[0] > vectorDanger[1]) {
           x = -1;
         }
       } else {
-        if (player.y < player.size) {
+        if (player.y < player.size + MIDDLEWARE.MIN_Y) {
           y = 1;
-        } else if (player.y > MAX_Y - player.size) {
+        } else if (player.y > MIDDLEWARE.MAX_Y - player.size) {
           y = -1;
         }
-        if (player.x < player.size) {
+        if (player.x < player.size + MIDDLEWARE.MIN_X) {
           x = 1;
-        } else if (player.x > MAX_X - player.size) {
+        } else if (player.x > MIDDLEWARE.MAX_X - player.size) {
           x = -1;
         }
       }
@@ -370,6 +374,7 @@ var DIE = false;
         y: Yc
       }, COLOR_DIRECTION, LINE_SIZE]);
     }
+    return [Xc, Yc];
   }
 
   // DINAMIC ALGORITHM
@@ -436,24 +441,18 @@ var DIE = false;
     //return dist(a.x, a.y, b.x, b.y);
     var cost = dist(a.x, a.y, b.x, b.y);
     cost /= b.size;
-    if (b.x < MAX_MOVE) { // REMOVE FOOD TOO CLOSE AT WALLS
+    if (b.x < MAX_MOVE + MIDDLEWARE.MIN_X) { // REMOVE FOOD TOO CLOSE AT WALLS
       cost = Infinity; //*= (b.x / MAX_MOVE) * COST_DANGER; //
-    } else if (b.x > MAX_X - MAX_MOVE) {
+    } else if (b.x > MIDDLEWARE.MAX_X - MAX_MOVE) {
       cost = Infinity; //*= (MAX_X - b.x / MAX_MOVE) * COST_DANGER; //
     }
 
-    if (b.y < MAX_MOVE) {
+    if (b.y < MAX_MOVE + MIDDLEWARE.MIN_Y) {
       cost = Infinity; //*= (b.y / MAX_MOVE) * COST_DANGER; //
-    } else if (b.y > MAX_Y - MAX_MOVE) {
+    } else if (b.y > MIDDLEWARE.MAX_Y - MAX_MOVE) {
       cost = Infinity; //*= (MAX_Y - b.y / MAX_MOVE) * COST_DANGER; //
     }
 
-    if ((b.x - a.x) * vectorDanger[0] < 0) {
-      cost *= COST_DANGER; //= Infinity; //
-    }
-    if ((b.y - a.y) * vectorDanger[1] < 0) {
-      cost *= COST_DANGER; //= Infinity; //
-    }
     return cost;
   }
 
@@ -500,11 +499,17 @@ var DIE = false;
 
     var asize = a.size / 2;
     var bsize = b.size / 2; // + (b.size > DIVIDE_SIZE && b.size * distance > a.size * COF_SIZE ? SPLIT_POWER : 0);
-    if (a.y > b.y) {
-      var y = (a.y - asize) > (b.y + bsize) ? ((a.y - asize) - (b.y + bsize)) : (-(a.y - asize) + (b.y + bsize));
+    var ax = a.x + MIDDLEWARE.MIN_X,
+      ay = a.y + MIDDLEWARE.MIN_Y,
+      bx = b.x + MIDDLEWARE.MIN_X,
+      by = b.y + MIDDLEWARE.MIN_Y;
+    if (ay > by) {
+      var y = (ay - asize) > (by + bsize) ? ((ay - asize) - (by + bsize)) : (-(ay - asize) + (by + bsize));
     } else {
-      var y = ((a.y + asize) < (b.y - bsize)) ? ((a.y + asize) - (b.y - bsize)) : (-(a.y + asize) + (b.y - bsize));
+      var y = ((ay + asize) < (by - bsize)) ? ((ay + asize) - (by - bsize)) : (-(ay + asize) + (by - bsize));
     }
+
+
     return y;
   }
 
