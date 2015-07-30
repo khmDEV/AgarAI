@@ -8,8 +8,6 @@
 // @grant        none
 // ==/UserScript==
 
-USER_SCRIPT = true; //USER_SCRIPT mode
-
 /*
  * OPTIONS
  */
@@ -145,7 +143,7 @@ var DIE = false;
       var s = MIDDLEWARE.getScore();
       maxScore = maxScore < s ? s : maxScore;
       var dir = calculate();
-      
+
       if (dir != undefined) {
         MIDDLEWARE.goTo(dir[0], dir[1]);
       }
@@ -315,8 +313,8 @@ var DIE = false;
         if (COSTS && COSTS_ROAD) {
           texts.push([Rod.cost.toFixed(2).toString(), (road[1].x + player.x) / 2, (road[1].y + player.y) / 2, FONT_DEFAULT, COLOR_POINTS]);
         }
-        x = (road[0].x - player.x);
-        y = (road[0].y - player.y);
+        x = road[0].x;
+        y = road[0].y;
       }
     }
     if (ALERT) {
@@ -362,12 +360,17 @@ var DIE = false;
       }
     }
     var mx = Math.abs(x) + Math.abs(y);
+    if (ALERT) {
+      x = mx != 0 ? x / mx : x;
+      y = mx != 0 ? y / mx : y;
 
-    x = mx != 0 ? x / mx : x;
-    y = mx != 0 ? y / mx : y;
+      Xc = x * MAX_VELOCITY + player.x;
+      Yc = y * MAX_VELOCITY + player.y;
+    }else{
+      Xc = x;
+      Yc = y
+    }
 
-    Xc = x * MAX_VELOCITY + player.x;
-    Yc = y * MAX_VELOCITY + player.y;
     if (LINES && LINES_DIRECTION) {
       lines.push([player, {
         x: Xc,
