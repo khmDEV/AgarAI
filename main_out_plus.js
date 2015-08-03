@@ -30,6 +30,9 @@
 
        render: custom render
        AI: AI system
+       pauseGame: function called when the game is paused
+       unpauseGame: function called when the game is unpaused
+       death: function called when the player die
   */
 
   if (window.MIDDLEWARE == null) {
@@ -40,6 +43,7 @@
     MIDDLEWARE.render = none;
     MIDDLEWARE.AI = none;
     MIDDLEWARE.start = none;
+    MIDDLEWARE.death = none;
     MIDDLEWARE.pauseGame = none;
     MIDDLEWARE.unpauseGame = none;
   }
@@ -56,6 +60,7 @@
     return document.getElementById('nick').value;
   };
   MIDDLEWARE.startGame = function() {
+    closeStats();
     setNick(MIDDLEWARE.getNick());
   };
 
@@ -82,7 +87,7 @@
 
   MIDDLEWARE.getNodes = function() {
     for (var i = 0; i < x.length; i++) {
-      x[i].isVirus = x[i].d;
+      x[i].isVirus = x[i].h;
     }
     return x.slice(0);
   };
@@ -251,6 +256,80 @@
   function la(a) {
     ba || S || (e("#adsBottom").show(), H = null, hb(d.aa), 1E3 > a && (u = 1), ba = !0, e("#mainPanel").show(), 0 < a ? e("#overlays").fadeIn(a) : e("#overlays").show())
     MIDDLEWARE.pauseGame();
+  }
+
+  //DEATH
+  function Pb(a, b) {
+    function c() {
+      for (var c = "";;) {
+        var d = a.getUint16(b, !0);
+        b += 2;
+        if (0 ==
+          d) break;
+        c += String.fromCharCode(d)
+      }
+      return c
+    }
+
+    function p() {
+      for (var c = "";;) {
+        var d = a.getUint8(b++);
+        if (0 == d) break;
+        c += String.fromCharCode(d)
+      }
+      return c
+    }
+    mb = F = Date.now();
+    ea || (ea = !0, Qb());
+    Ma = !1;
+    var r = a.getUint16(b, !0);
+    b += 2;
+    for (var q = 0; q < r; ++q) {
+      var n = I[a.getUint32(b, !0)],
+        k = I[a.getUint32(b + 4, !0)];
+      b += 8;
+      n && k && (k.X(), k.s = k.x, k.t = k.y, k.r = k.size, k.J = n.x, k.K = n.y, k.q = k.size, k.Q = F, Rb(n, k))
+    }
+    for (q = 0;;) {
+      r = a.getUint32(b, !0);
+      b += 4;
+      if (0 == r) break;
+      ++q;
+      var f, n = a.getInt32(b, !0);
+      b += 4;
+      k = a.getInt32(b, !0);
+      b += 4;
+      f = a.getInt16(b, !0);
+      b +=
+        2;
+      var l = a.getUint8(b++),
+        g = a.getUint8(b++),
+        m = a.getUint8(b++),
+        g = Sb(l << 16 | g << 8 | m),
+        m = a.getUint8(b++),
+        s = !!(m & 1),
+        t = !!(m & 16),
+        nb = null;
+      m & 2 && (b += 4 + a.getUint32(b, !0));
+      m & 4 && (nb = p());
+      var u = c(),
+        l = null;
+      I.hasOwnProperty(r) ? (l = I[r], l.P(), l.s = l.x, l.t = l.y, l.r = l.size, l.color = g) : (l = new W(r, n, k, f, g, u), x.push(l), I[r] = l, l.ta = n, l.ua = k);
+      l.h = s;
+      l.n = t;
+      l.J = n;
+      l.K = k;
+      l.q = f;
+      l.Q = F;
+      l.ba = m;
+      l.fa = nb;
+      u && l.B(u); - 1 != B.indexOf(r) && -1 == h.indexOf(l) && (h.push(l), 1 == h.length && (v = l.x, w = l.y, ob(), document.getElementById("overlays").style.display =
+        "none", z = [], Na = 0, Oa = h[0].color, Pa = !0, pb = Date.now(), R = Qa = Ra = 0))
+    }
+    n = a.getUint32(b, !0);
+    b += 4;
+    for (q = 0; q < n; q++) r = a.getUint32(b, !0), b += 4, l = I[r], null != l && l.X();
+    Ma && 0 == h.length && (qb = Date.now(), Pa = !1, ba || S || (rb ? (hb(d.ab), Tb(), S = !0, e("#overlays").fadeIn(3E3), e("#stats").show(),MIDDLEWARE.death()) : la(3E3)))
   }
 
   /*
@@ -530,79 +609,6 @@
           })
         }, 1200)
     }
-  }
-
-  function Pb(a, b) {
-    function c() {
-      for (var c = "";;) {
-        var d = a.getUint16(b, !0);
-        b += 2;
-        if (0 ==
-          d) break;
-        c += String.fromCharCode(d)
-      }
-      return c
-    }
-
-    function p() {
-      for (var c = "";;) {
-        var d = a.getUint8(b++);
-        if (0 == d) break;
-        c += String.fromCharCode(d)
-      }
-      return c
-    }
-    mb = F = Date.now();
-    ea || (ea = !0, Qb());
-    Ma = !1;
-    var r = a.getUint16(b, !0);
-    b += 2;
-    for (var q = 0; q < r; ++q) {
-      var n = I[a.getUint32(b, !0)],
-        k = I[a.getUint32(b + 4, !0)];
-      b += 8;
-      n && k && (k.X(), k.s = k.x, k.t = k.y, k.r = k.size, k.J = n.x, k.K = n.y, k.q = k.size, k.Q = F, Rb(n, k))
-    }
-    for (q = 0;;) {
-      r = a.getUint32(b, !0);
-      b += 4;
-      if (0 == r) break;
-      ++q;
-      var f, n = a.getInt32(b, !0);
-      b += 4;
-      k = a.getInt32(b, !0);
-      b += 4;
-      f = a.getInt16(b, !0);
-      b +=
-        2;
-      var l = a.getUint8(b++),
-        g = a.getUint8(b++),
-        m = a.getUint8(b++),
-        g = Sb(l << 16 | g << 8 | m),
-        m = a.getUint8(b++),
-        s = !!(m & 1),
-        t = !!(m & 16),
-        nb = null;
-      m & 2 && (b += 4 + a.getUint32(b, !0));
-      m & 4 && (nb = p());
-      var u = c(),
-        l = null;
-      I.hasOwnProperty(r) ? (l = I[r], l.P(), l.s = l.x, l.t = l.y, l.r = l.size, l.color = g) : (l = new W(r, n, k, f, g, u), x.push(l), I[r] = l, l.ta = n, l.ua = k);
-      l.h = s;
-      l.n = t;
-      l.J = n;
-      l.K = k;
-      l.q = f;
-      l.Q = F;
-      l.ba = m;
-      l.fa = nb;
-      u && l.B(u); - 1 != B.indexOf(r) && -1 == h.indexOf(l) && (h.push(l), 1 == h.length && (v = l.x, w = l.y, ob(), document.getElementById("overlays").style.display =
-        "none", z = [], Na = 0, Oa = h[0].color, Pa = !0, pb = Date.now(), R = Qa = Ra = 0))
-    }
-    n = a.getUint32(b, !0);
-    b += 4;
-    for (q = 0; q < n; q++) r = a.getUint32(b, !0), b += 4, l = I[r], null != l && l.X();
-    Ma && 0 == h.length && (qb = Date.now(), Pa = !1, ba || S || (rb ? (hb(d.ab), Tb(), S = !0, e("#overlays").fadeIn(3E3), e("#stats").show()) : la(3E3)))
   }
 
   function Qb() {

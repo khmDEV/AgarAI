@@ -88,9 +88,9 @@ var DIE = false;
   MIDDLEWARE.render = render;
   MIDDLEWARE.AI = AI;
   MIDDLEWARE.start = startGame;
-  MIDDLEWARE.pauseGame = pauseGame;
+  MIDDLEWARE.death = death;
+  MIDDLEWARE.pauseGame = none;
   MIDDLEWARE.unpauseGame = none;
-
 
   function startGame() {
     defaultSettings();
@@ -106,7 +106,7 @@ var DIE = false;
     Rod = undefined;
   }
 
-  function pauseGame() {
+  function death() {
     if (AUTO_RESTART) {
       MIDDLEWARE.startGame();
     }
@@ -359,14 +359,14 @@ var DIE = false;
         }
       }
     }
-    var mx = Math.abs(x) + Math.abs(y);
     if (ALERT) {
+      var mx = Math.abs(x) + Math.abs(y);
       x = mx != 0 ? x / mx : x;
       y = mx != 0 ? y / mx : y;
 
       Xc = x * MAX_VELOCITY + player.x;
       Yc = y * MAX_VELOCITY + player.y;
-    }else{
+    } else {
       Xc = x;
       Yc = y
     }
